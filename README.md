@@ -1,6 +1,12 @@
 # Phone Info
 
-A Flutter plugin for retrieving detailed phone information on Android devices, including network status, device details, and system specifications. This plugin provides a flexible API to fetch all information at once or individual pieces as needed, making it ideal for apps requiring device or network insights.
+A Flutter plugin for retrieving detailed phone information on Android devices, including network
+status, device details, and system specifications.
+This plugin provides a flexible API to fetch all information at once or individual pieces as needed,
+making it ideal for apps requiring device or network insights.
+
+[![Pub Version](https://img.shields.io/pub/v/phone_info.svg)](https://pub.dev/packages/phone_info)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Features
 
@@ -23,10 +29,10 @@ A Flutter plugin for retrieving detailed phone information on Android devices, i
 
 ## Platform Support
 
-| Platform | Supported | Notes |
-|----------|-----------|-------|
-| Android  | ✅        | Fully supported (API 21+). |
-| iOS      | ❌        | iOS support not yet implemented (contributions welcome!). |
+| Platform | Supported | Notes                                                     |
+|----------|-----------|-----------------------------------------------------------|
+| Android  | ✅         | Fully supported (API 21+).                                |
+| iOS      | ❌         | iOS support not yet implemented (contributions welcome!). |
 
 ## Installation
 
@@ -45,14 +51,16 @@ flutter pub get
 
 ### Android Setup
 
-1. **Permissions**: Add the following permissions to your app’s `android/app/src/main/AndroidManifest.xml`:
+1. **Permissions**: Add the following permissions to your
+   app’s `android/app/src/main/AndroidManifest.xml`:
    ```xml
    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
    ```
 
-2. **Runtime Permissions**: For `READ_PHONE_STATE` (required for `getNetworkOperator`), request permission at runtime using a package like `permission_handler` (see example below).
+2. **Runtime Permissions**: For `READ_PHONE_STATE` (required for `getNetworkOperator`), request
+   permission at runtime using a package like `permission_handler` (see example below).
 
 ## Usage
 
@@ -164,6 +172,10 @@ class _PhoneInfoScreenState extends State<PhoneInfoScreen> {
 }
 ```
 
+## Complete Example
+
+For a complete see the [example app](example/lib/main.dart).
+
 ### Example Output
 
 When you press the buttons, you’ll see output like:
@@ -178,37 +190,40 @@ Device ID: d55d784905cd7b6e
 
 The `PhoneInfoPlugin` class provides the following methods:
 
-| Method | Return Type | Description |
-|--------|-------------|-------------|
-| `getPhoneInfo()` | `Future<Map<String, dynamic>?>` | Retrieves all phone information in a single call. |
-| `getPlatformVersion()` | `Future<String?>` | Gets the Android OS version (e.g., "Android 14"). |
-| `getIsConnected()` | `Future<bool?>` | Checks if the device is connected to a network. |
-| `getConnectionType()` | `Future<String?>` | Gets the connection type (`Wi-Fi`, `Mobile Data`, `None`). |
-| `getNetworkOperator()` | `Future<String?>` | Gets the network operator name (requires `READ_PHONE_STATE`). |
-| `getSignalStrength()` | `Future<int?>` | Gets the Wi-Fi signal strength in RSSI (dBm). |
-| `getDeviceName()` | `Future<String?>` | Gets the device name (e.g., "realme C61"). |
-| `getManufacturer()` | `Future<String?>` | Gets the manufacturer (e.g., "realme"). |
-| `getModel()` | `Future<String?>` | Gets the device model (e.g., "RMX3930"). |
-| `getOsVersion()` | `Future<String?>` | Gets the OS version (e.g., "14"). |
-| `getArchitecture()` | `Future<String?>` | Gets the device architecture (e.g., "aarch64"). |
-| `getDeviceId()` | `Future<String?>` | Gets the unique device ID. |
-| `getTotalMemory()` | `Future<int?>` | Gets the total memory in MB. |
-| `getAvailableStorage()` | `Future<int?>` | Gets the available storage in MB. |
+| Method                  | Return Type                     | Description                                                   |
+|-------------------------|---------------------------------|---------------------------------------------------------------|
+| `getPhoneInfo()`        | `Future<Map<String, dynamic>?>` | Retrieves all phone information in a single call.             |
+| `getPlatformVersion()`  | `Future<String?>`               | Gets the Android OS version (e.g., "Android 14").             |
+| `getIsConnected()`      | `Future<bool?>`                 | Checks if the device is connected to a network.               |
+| `getConnectionType()`   | `Future<String?>`               | Gets the connection type (`Wi-Fi`, `Mobile Data`, `None`).    |
+| `getNetworkOperator()`  | `Future<String?>`               | Gets the network operator name (requires `READ_PHONE_STATE`). |
+| `getSignalStrength()`   | `Future<int?>`                  | Gets the Wi-Fi signal strength in RSSI (dBm).                 |
+| `getDeviceName()`       | `Future<String?>`               | Gets the device name (e.g., "realme C61").                    |
+| `getManufacturer()`     | `Future<String?>`               | Gets the manufacturer (e.g., "realme").                       |
+| `getModel()`            | `Future<String?>`               | Gets the device model (e.g., "RMX3930").                      |
+| `getOsVersion()`        | `Future<String?>`               | Gets the OS version (e.g., "14").                             |
+| `getArchitecture()`     | `Future<String?>`               | Gets the device architecture (e.g., "aarch64").               |
+| `getDeviceId()`         | `Future<String?>`               | Gets the unique device ID.                                    |
+| `getTotalMemory()`      | `Future<int?>`                  | Gets the total memory in MB.                                  |
+| `getAvailableStorage()` | `Future<int?>`                  | Gets the available storage in MB.                             |
 
 ### Notes
-- All methods are asynchronous and return `Future`s. Use `await` to get the result (e.g., `await PhoneInfoPlugin.getDeviceName()`).
-- Methods that may fail due to permissions (e.g., `getNetworkOperator`) return `null` if the data is unavailable.
+
+- All methods are asynchronous and return `Future`s. Use `await` to get the result (
+  e.g., `await PhoneInfoPlugin.getDeviceName()`).
+- Methods that may fail due to permissions (e.g., `getNetworkOperator`) return `null` if the data is
+  unavailable.
 - Wrap method calls in `try-catch` blocks to handle potential platform exceptions.
 
 ## Permissions
 
 The plugin requires the following Android permissions:
 
-| Permission | Purpose | Runtime Permission Required? |
-|------------|---------|------------------------------|
-| `ACCESS_WIFI_STATE` | Access Wi-Fi signal strength | No |
-| `ACCESS_NETWORK_STATE` | Check network connection status | No |
-| `READ_PHONE_STATE` | Get network operator name | Yes (Android 6.0+) |
+| Permission             | Purpose                         | Runtime Permission Required? |
+|------------------------|---------------------------------|------------------------------|
+| `ACCESS_WIFI_STATE`    | Access Wi-Fi signal strength    | No                           |
+| `ACCESS_NETWORK_STATE` | Check network connection status | No                           |
+| `READ_PHONE_STATE`     | Get network operator name       | Yes (Android 6.0+)           |
 
 ### Requesting Runtime Permissions
 
@@ -218,7 +233,9 @@ Use the `permission_handler` package to request `READ_PHONE_STATE` at runtime:
 import 'package:permission_handler/permission_handler.dart';
 
 Future<void> requestPermissions() async {
-  if (await Permission.phone.request().isGranted) {
+  if (await Permission.phone
+      .request()
+      .isGranted) {
     // Permission granted
   } else {
     // Handle permission denial
@@ -228,12 +245,16 @@ Future<void> requestPermissions() async {
 
 ## Troubleshooting
 
-- **MissingPluginException**: If you see `No implementation found for method ...`, ensure the plugin is properly built:
+- **MissingPluginException**: If you see `No implementation found for method ...`, ensure the plugin
+  is properly built:
     - Run `flutter clean` and `flutter pub get` in both the plugin and app directories.
     - Rebuild the app with `flutter run`.
-- **Instance of 'Future<String?>'**: Ensure you use `await` when calling asynchronous methods (e.g., `await PhoneInfoPlugin.getDeviceName()`).
-- **Null Values**: If methods like `getNetworkOperator` return `null`, check that the required permissions are granted.
-- **Build Failures**: Ensure your `android/build.gradle` includes `androidx.core:core-ktx:1.12.0` and the correct Kotlin version (e.g., `1.8.22` or later).
+- **Instance of 'Future<String?>'**: Ensure you use `await` when calling asynchronous methods (
+  e.g., `await PhoneInfoPlugin.getDeviceName()`).
+- **Null Values**: If methods like `getNetworkOperator` return `null`, check that the required
+  permissions are granted.
+- **Build Failures**: Ensure your `android/build.gradle` includes `androidx.core:core-ktx:1.12.0`
+  and the correct Kotlin version (e.g., `1.8.22` or later).
 
 ## Contributing
 
@@ -253,4 +274,5 @@ This plugin is licensed under the [MIT License](LICENSE).
 
 ## Contact
 
-For issues or feature requests, please open an issue on the [GitHub repository](https://github.com/Syed-Bipul-Rahman/phone_info).
+For issues or feature requests, please open an issue on
+the [GitHub repository](https://github.com/Syed-Bipul-Rahman/phone_info).
