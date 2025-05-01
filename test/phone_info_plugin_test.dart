@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phone_info/phone_info.dart';
 import 'package:phone_info/phone_info_plugin_method_channel.dart';
 import 'package:phone_info/phone_info_plugin_platform_interface.dart';
-
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 class MockPhoneInfoPluginPlatform
@@ -21,7 +20,6 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    PhoneInfoPlugin phoneInfoPlugin = PhoneInfoPlugin();
     MockPhoneInfoPluginPlatform fakePlatform = MockPhoneInfoPluginPlatform();
     PhoneInfoPluginPlatform.instance = fakePlatform;
 

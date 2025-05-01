@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:phone_info/phone_info.dart';
 
@@ -6,6 +7,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,13 +20,13 @@ class MyApp extends StatelessWidget {
               //give permission if required
               //   await Permission.phone.request();
               final info = await PhoneInfoPlugin.getPhoneInfo();
-              print('Phone Info: $info');
               final version = await PhoneInfoPlugin.getPlatformVersion();
-              print('Platform Version: $version');
-              final devicename = await PhoneInfoPlugin.getDeviceId();
-              print("device name $devicename");
+              final deviceName = await PhoneInfoPlugin.getDeviceId();
               final storage = await PhoneInfoPlugin.getAvailableStorage();
-              print("Storage $storage");
+
+              if (kDebugMode) {
+                print('$info , $version , $deviceName , $storage');
+              }
             },
             child: Text('Get Phone Info'),
           ),
