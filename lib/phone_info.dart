@@ -1,79 +1,202 @@
+import 'dart:async';
 import 'package:flutter/services.dart';
 
 class PhoneInfoPlugin {
   static const MethodChannel _channel = MethodChannel('phone_info_plugin');
+  static const EventChannel _batteryChannel = EventChannel(
+    'phone_info_plugin/battery_stream',
+  );
 
   /// Get all phone information in a single call
-  static Future<Map<String, dynamic>?> getPhoneInfo() async {
-    final Map<dynamic, dynamic>? result = await _channel.invokeMethod(
+  static Future<Map<String, dynamic>> getPhoneInfo() async {
+    final Map<dynamic, dynamic> result = await _channel.invokeMethod(
       'getPhoneInfo',
     );
-    return result?.cast<String, dynamic>();
+    return Map<String, dynamic>.from(result);
   }
 
-  /// Get the Android platform version
+  /// Get the platform version
   static Future<String?> getPlatformVersion() async {
     final String? version = await _channel.invokeMethod('getPlatformVersion');
     return version;
   }
 
-  /// Check if the device is connected to a network
-  static Future<bool?> getIsConnected() async {
-    return await _channel.invokeMethod('getIsConnected');
+  /// Check if device is connected to internet
+  static Future<bool> getIsConnected() async {
+    final bool result = await _channel.invokeMethod('getIsConnected');
+    return result;
   }
 
-  /// Get the current network connection type (Wi-Fi, Mobile Data, None)
+  /// Get current connection type (Wi-Fi, Mobile Data, None)
   static Future<String?> getConnectionType() async {
-    return await _channel.invokeMethod('getConnectionType');
+    final String? result = await _channel.invokeMethod('getConnectionType');
+    return result;
   }
 
-  /// Get the network operator name (requires READ_PHONE_STATE permission)
+  /// Get network operator name
   static Future<String?> getNetworkOperator() async {
-    return await _channel.invokeMethod('getNetworkOperator');
+    final String? result = await _channel.invokeMethod('getNetworkOperator');
+    return result;
   }
 
-  /// Get the Wi-Fi signal strength in RSSI (dBm)
+  /// Get signal strength in dBm (for Wi-Fi)
   static Future<int?> getSignalStrength() async {
-    return await _channel.invokeMethod('getSignalStrength');
+    final int? result = await _channel.invokeMethod('getSignalStrength');
+    return result;
   }
 
-  /// Get the device name
+  /// Get device name
   static Future<String?> getDeviceName() async {
-    return await _channel.invokeMethod('getDeviceName');
+    final String? result = await _channel.invokeMethod('getDeviceName');
+    return result;
   }
 
-  /// Get the device manufacturer
+  /// Get device manufacturer
   static Future<String?> getManufacturer() async {
-    return await _channel.invokeMethod('getManufacturer');
+    final String? result = await _channel.invokeMethod('getManufacturer');
+    return result;
   }
 
-  /// Get the device model
+  /// Get device model
   static Future<String?> getModel() async {
-    return await _channel.invokeMethod('getModel');
+    final String? result = await _channel.invokeMethod('getModel');
+    return result;
   }
 
-  /// Get the operating system version
+  /// Get OS version
   static Future<String?> getOsVersion() async {
-    return await _channel.invokeMethod('getOsVersion');
+    final String? result = await _channel.invokeMethod('getOsVersion');
+    return result;
   }
 
-  /// Get the device architecture (e.g., arm64-v8a)
+  /// Get device architecture
   static Future<String?> getArchitecture() async {
-    return await _channel.invokeMethod('getArchitecture');
+    final String? result = await _channel.invokeMethod('getArchitecture');
+    return result;
   }
 
-  /// Get the unique device ID
+  /// Get device ID (Android ID)
   static Future<String?> getDeviceId() async {
-    return await _channel.invokeMethod('getDeviceId');
+    final String? result = await _channel.invokeMethod('getDeviceId');
+    return result;
   }
 
-  /// Get the total memory in MB
+  /// Get total memory in MB
   static Future<int?> getTotalMemory() async {
-    return await _channel.invokeMethod('getTotalMemory');
+    final int? result = await _channel.invokeMethod('getTotalMemory');
+    return result;
   }
 
-  /// Get the available storage in MB
+  /// Get available storage in MB
   static Future<int?> getAvailableStorage() async {
-    return await _channel.invokeMethod('getAvailableStorage');
+    final int? result = await _channel.invokeMethod('getAvailableStorage');
+    return result;
+  }
+
+  /// Get battery information
+  static Future<Map<String, dynamic>> getBatteryInfo() async {
+    final Map<dynamic, dynamic> result = await _channel.invokeMethod(
+      'getBatteryInfo',
+    );
+    return Map<String, dynamic>.from(result);
+  }
+
+  /// Get CPU information
+  static Future<Map<String, dynamic>> getCpuInfo() async {
+    final Map<dynamic, dynamic> result = await _channel.invokeMethod(
+      'getCpuInfo',
+    );
+    return Map<String, dynamic>.from(result);
+  }
+
+  /// Get network information
+  static Future<Map<String, dynamic>> getNetworkInfo() async {
+    final Map<dynamic, dynamic> result = await _channel.invokeMethod(
+      'getNetworkInfo',
+    );
+    return Map<String, dynamic>.from(result);
+  }
+
+  /// Get screen information
+  static Future<Map<String, dynamic>> getScreenInfo() async {
+    final Map<dynamic, dynamic> result = await _channel.invokeMethod(
+      'getScreenInfo',
+    );
+    return Map<String, dynamic>.from(result);
+  }
+
+  /// Get sensor information
+  static Future<List<Map<String, dynamic>>> getSensorInfo() async {
+    final List<dynamic> result = await _channel.invokeMethod('getSensorInfo');
+    return result.map((item) => Map<String, dynamic>.from(item)).toList();
+  }
+
+  /// Get storage information
+  static Future<Map<String, dynamic>> getStorageInfo() async {
+    final Map<dynamic, dynamic> result = await _channel.invokeMethod(
+      'getStorageInfo',
+    );
+    return Map<String, dynamic>.from(result);
+  }
+
+  /// Get camera information
+  static Future<List<Map<String, dynamic>>> getCameraInfo() async {
+    final List<dynamic> result = await _channel.invokeMethod('getCameraInfo');
+    return result.map((item) => Map<String, dynamic>.from(item)).toList();
+  }
+
+  /// Get biometric information
+  static Future<Map<String, dynamic>> getBiometricInfo() async {
+    final Map<dynamic, dynamic> result = await _channel.invokeMethod(
+      'getBiometricInfo',
+    );
+    return Map<String, dynamic>.from(result);
+  }
+
+  /// Get SIM information
+  static Future<Map<String, dynamic>> getSimInfo() async {
+    final Map<dynamic, dynamic> result = await _channel.invokeMethod(
+      'getSimInfo',
+    );
+    return Map<String, dynamic>.from(result);
+  }
+
+  /// Get system health information
+  static Future<Map<String, dynamic>> getSystemHealth() async {
+    final Map<dynamic, dynamic> result = await _channel.invokeMethod(
+      'getSystemHealth',
+    );
+    return Map<String, dynamic>.from(result);
+  }
+
+  /// Get accessibility information
+  static Future<List<String>> getAccessibilityInfo() async {
+    final List<dynamic> result = await _channel.invokeMethod(
+      'getAccessibilityInfo',
+    );
+    return result.cast<String>();
+  }
+
+  /// Get security information
+  static Future<Map<String, dynamic>> getSecurityInfo() async {
+    final Map<dynamic, dynamic> result = await _channel.invokeMethod(
+      'getSecurityInfo',
+    );
+    return Map<String, dynamic>.from(result);
+  }
+
+  /// Get app usage statistics
+  static Future<List<Map<String, dynamic>>> getAppUsageStats() async {
+    final List<dynamic> result = await _channel.invokeMethod(
+      'getAppUsageStats',
+    );
+    return result.map((item) => Map<String, dynamic>.from(item)).toList();
+  }
+
+  /// Stream to listen for battery changes
+  static Stream<Map<String, dynamic>> get batteryInfoStream {
+    return _batteryChannel.receiveBroadcastStream().map(
+      (dynamic event) => Map<String, dynamic>.from(event),
+    );
   }
 }
