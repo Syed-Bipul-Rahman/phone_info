@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:phone_info/phone_info.dart';
 
 void main() {
@@ -20,6 +21,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    _requestPermissions();
     _loadData();
     // Listen for battery updates
     PhoneInfoPlugin.batteryInfoStream.listen((batteryData) {
@@ -27,6 +29,19 @@ class _MyAppState extends State<MyApp> {
         _batteryInfo = batteryData;
       });
     });
+  }
+
+  Future<void> _requestPermissions() async {
+    Map<Permission, PermissionStatus> statuses =
+        await [
+          Permission.phone,
+          Permission.camera,
+          Permission.storage,
+        ].request();
+    if (await Permission.manageExternalStorage.isDenied) {
+      await Permission.manageExternalStorage.request();
+    }
+    //  await openAppSettings();
   }
 
   Future<void> _loadData() async {
@@ -41,7 +56,11 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         _isLoading = false;
       });
-      print('Error loading phone info: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading phone info: $e')));
+      }
     }
   }
 
@@ -55,12 +74,12 @@ class _MyAppState extends State<MyApp> {
                 ? const Center(child: CircularProgressIndicator())
                 : _phoneInfo == null
                 ? const Center(child: Text('Failed to load phone information'))
-                : _buildInfoList(),
+                : _buildInfoList(context),
       ),
     );
   }
 
-  Widget _buildInfoList() {
+  Widget _buildInfoList(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
@@ -73,57 +92,75 @@ class _MyAppState extends State<MyApp> {
           'Device ID': _phoneInfo?['deviceId'],
         }),
         _buildSection('Battery Info', {
-          'Level': '${_batteryInfo?['batteryLevel']}%',
-          'Charging': _batteryInfo?['isCharging'] ? 'Yes' : 'No',
-          'Health': _batteryInfo?['health'],
-          'Temperature': '${_batteryInfo?['temperature']}°C',
+          'Level': '${_batteryInfo?['batteryLevel'] ?? 'N/A'}%',
+          'Charging': _batteryInfo?['isCharging'] == true ? 'Yes' : 'No',
+          'Health': _batteryInfo?['health'] ?? 'N/A',
+          'Temperature': '${_batteryInfo?['temperature'] ?? 'N/A'}°C',
         }),
         _buildSection('Network Info', {
-          'Connected': _phoneInfo?['isConnected'] ? 'Yes' : 'No',
-          'Connection Type': _phoneInfo?['connectionType'],
-          'Network Operator': _phoneInfo?['networkOperator'],
-          'Signal Strength': _phoneInfo?['signalStrength']?.toString(),
+          'Connected': _phoneInfo?['isConnected'] == true ? 'Yes' : 'No',
+          'Connection Type': _phoneInfo?['connectionType'] ?? 'N/A',
+          'Network Operator': _phoneInfo?['networkOperator'] ?? 'N/A',
+          'Signal Strength': _phoneInfo?['signalStrength']?.toString() ?? 'N/A',
         }),
         _buildSection('Storage & Memory', {
-          'Total Memory': '${_phoneInfo?['totalMemory']} MB',
-          'Available Storage': '${_phoneInfo?['availableStorage']} MB',
+          'Total Memory': '${_phoneInfo?['totalMemory'] ?? 'N/A'} MB',
+          'Available Storage': '${_phoneInfo?['availableStorage'] ?? 'N/A'} MB',
         }),
         ElevatedButton(
           onPressed: () async {
-            final sensors = await PhoneInfoPlugin.getSensorInfo();
-            _showModal(
-              context,
-              'Sensors',
-              sensors.map((s) => '${s['name']} (${s['vendor']})').toList(),
-            );
+            try {
+              final sensors = await PhoneInfoPlugin.getSensorInfo();
+              _showModal(
+                context,
+                'Sensors',
+                sensors.map((s) => '${s['name']} (${s['vendor']})').toList(),
+              );
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error loading sensors: $e')),
+              );
+            }
           },
           child: const Text('View Sensors'),
         ),
         const SizedBox(height: 8),
         ElevatedButton(
           onPressed: () async {
-            final cameras = await PhoneInfoPlugin.getCameraInfo();
-            _showModal(
-              context,
-              'Cameras',
-              cameras
-                  .map(
-                    (c) =>
-                        '${c['isFront'] ? 'Front' : 'Rear'}: ${c['megapixels']} MP${c['hasFlash'] ? ' (with flash)' : ''}',
-                  )
-                  .toList(),
-            );
+            try {
+              final cameras = await PhoneInfoPlugin.getCameraInfo();
+              _showModal(
+                context,
+                'Cameras',
+                cameras
+                    .map(
+                      (c) =>
+                          '${c['isFront'] == true ? 'Front' : 'Rear'}: ${c['megapixels'] ?? 'N/A'} MP${c['hasFlash'] == true ? ' (with flash)' : ''}',
+                    )
+                    .toList(),
+              );
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error loading cameras: $e')),
+              );
+            }
           },
           child: const Text('View Cameras'),
         ),
         const SizedBox(height: 8),
         ElevatedButton(
           onPressed: () async {
-            final security = await PhoneInfoPlugin.getSecurityInfo();
-            _showModal(context, 'Security Info', [
-              'Rooted: ${security['isRooted'] ? 'Yes' : 'No'}',
-              'Encrypted: ${security['isEncrypted'] ? 'Yes' : 'No'}',
-            ]);
+            try {
+              final security = await PhoneInfoPlugin.getSecurityInfo();
+              _showModal(context, 'Security Info', [
+                'Rooted: ${security['isRooted'] == true ? 'Yes' : 'No'}',
+                'Encrypted: ${security['isEncrypted'] == true ? 'Yes' : 'No'}',
+              ]);
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error loading security info: $e')),
+              );
+            }
           },
           child: const Text('View Security Info'),
         ),
@@ -172,10 +209,11 @@ class _MyAppState extends State<MyApp> {
     showModalBottomSheet(
       context: context,
       builder:
-          (context) => Container(
+          (BuildContext modalContext) => Container(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   title,
