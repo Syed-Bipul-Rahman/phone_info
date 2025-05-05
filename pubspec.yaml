@@ -1,6 +1,6 @@
 name: phone_info
 description: "A powerful Flutter plugin to fetch detailed phone hardware and network information, including device architecture (CPU, ABI), network status (IP, connection type), and other critical metrics—ideal for debugging, analytics, and dynamic feature handling."
-version: 0.0.1
+version: 0.1.0
 homepage: https://github.com/Syed-Bipul-Rahman/phone_info
 
 environment:

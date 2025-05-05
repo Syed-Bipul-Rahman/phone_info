@@ -25,9 +25,12 @@ class _MyAppState extends State<MyApp> {
     _loadData();
     // Listen for battery updates
     PhoneInfoPlugin.batteryInfoStream.listen((batteryData) {
-      setState(() {
-        _batteryInfo = batteryData;
-      });
+      if (mounted) {
+        // Check if widget is still mounted before calling setState
+        setState(() {
+          _batteryInfo = batteryData;
+        });
+      }
     });
   }
 
@@ -41,22 +44,29 @@ class _MyAppState extends State<MyApp> {
     if (await Permission.manageExternalStorage.isDenied) {
       await Permission.manageExternalStorage.request();
     }
-    //  await openAppSettings();
+    if (await Permission.sensors.isDenied || statuses.isNotEmpty) {
+      await openAppSettings();
+      await Permission.sensors.request();
+    }
   }
 
   Future<void> _loadData() async {
     try {
       final phoneInfo = await PhoneInfoPlugin.getPhoneInfo();
-      setState(() {
-        _phoneInfo = phoneInfo;
-        _batteryInfo = phoneInfo['batteryInfo'] as Map<String, dynamic>?;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
       if (mounted) {
+        // Check if widget is still mounted before calling setState
+        setState(() {
+          _phoneInfo = phoneInfo;
+          _batteryInfo = phoneInfo['batteryInfo'] as Map<String, dynamic>?;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        // Check if widget is still mounted before calling setState
+        setState(() {
+          _isLoading = false;
+        });
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Error loading phone info: $e')));
@@ -74,12 +84,12 @@ class _MyAppState extends State<MyApp> {
                 ? const Center(child: CircularProgressIndicator())
                 : _phoneInfo == null
                 ? const Center(child: Text('Failed to load phone information'))
-                : _buildInfoList(context),
+                : _buildInfoList(),
       ),
     );
   }
 
-  Widget _buildInfoList(BuildContext context) {
+  Widget _buildInfoList() {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
@@ -108,64 +118,80 @@ class _MyAppState extends State<MyApp> {
           'Available Storage': '${_phoneInfo?['availableStorage'] ?? 'N/A'} MB',
         }),
         ElevatedButton(
-          onPressed: () async {
-            try {
-              final sensors = await PhoneInfoPlugin.getSensorInfo();
-              _showModal(
-                context,
-                'Sensors',
-                sensors.map((s) => '${s['name']} (${s['vendor']})').toList(),
-              );
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error loading sensors: $e')),
-              );
-            }
-          },
+          onPressed: () => _viewSensors(context),
           child: const Text('View Sensors'),
         ),
         const SizedBox(height: 8),
         ElevatedButton(
-          onPressed: () async {
-            try {
-              final cameras = await PhoneInfoPlugin.getCameraInfo();
-              _showModal(
-                context,
-                'Cameras',
-                cameras
-                    .map(
-                      (c) =>
-                          '${c['isFront'] == true ? 'Front' : 'Rear'}: ${c['megapixels'] ?? 'N/A'} MP${c['hasFlash'] == true ? ' (with flash)' : ''}',
-                    )
-                    .toList(),
-              );
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error loading cameras: $e')),
-              );
-            }
-          },
+          onPressed: () => _viewCameras(context),
           child: const Text('View Cameras'),
         ),
         const SizedBox(height: 8),
         ElevatedButton(
-          onPressed: () async {
-            try {
-              final security = await PhoneInfoPlugin.getSecurityInfo();
-              _showModal(context, 'Security Info', [
-                'Rooted: ${security['isRooted'] == true ? 'Yes' : 'No'}',
-                'Encrypted: ${security['isEncrypted'] == true ? 'Yes' : 'No'}',
-              ]);
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error loading security info: $e')),
-              );
-            }
-          },
+          onPressed: () => _viewSecurityInfo(context),
           child: const Text('View Security Info'),
         ),
       ],
     );
+  }
+
+  // Helper methods for button actions with context parameter
+  Future<void> _viewSensors(BuildContext context) async {
+    try {
+      final sensors = await PhoneInfoPlugin.getSensorInfo();
+      // Check if widget is still mounted before using context
+      if (!mounted) return;
+      _showModal(
+        context,
+        'Sensors',
+        sensors.map((s) => '${s['name']} (${s['vendor']})').toList(),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error loading sensors: $e')));
+    }
+  }
+
+  Future<void> _viewCameras(BuildContext context) async {
+    try {
+      final cameras = await PhoneInfoPlugin.getCameraInfo();
+      // Check if widget is still mounted before using context
+      if (!mounted) return;
+      _showModal(
+        context,
+        'Cameras',
+        cameras
+            .map(
+              (c) =>
+                  '${c['isFront'] == true ? 'Front' : 'Rear'}: ${c['megapixels'] ?? 'N/A'} MP${c['hasFlash'] == true ? ' (with flash)' : ''}',
+            )
+            .toList(),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error loading cameras: $e')));
+    }
+  }
+
+  Future<void> _viewSecurityInfo(BuildContext context) async {
+    try {
+      final security = await PhoneInfoPlugin.getSecurityInfo();
+      // Check if widget is still mounted before using context
+      if (!mounted) return;
+      _showModal(context, 'Security Info', [
+        'Rooted: ${security['isRooted'] == true ? 'Yes' : 'No'}',
+        'Encrypted: ${security['isEncrypted'] == true ? 'Yes' : 'No'}',
+      ]);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading security info: $e')),
+      );
+    }
   }
 
   Widget _buildSection(String title, Map<String, dynamic> items) {
@@ -209,32 +235,34 @@ class _MyAppState extends State<MyApp> {
     showModalBottomSheet(
       context: context,
       builder:
-          (BuildContext modalContext) => Container(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+          (BuildContext modalContext) => SafeArea(
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const Divider(),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: items.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: Text(items[index]),
-                      );
-                    },
+                  const Divider(),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: Text(items[index]),
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
     );
